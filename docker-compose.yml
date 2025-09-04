@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  baguette-metro:
+    build: .
+    container_name: baguette-metro-app
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PORT=8000
+    volumes:
+      # Volume pour les données persistantes
+      - ./data:/app/data
+      # Volume pour les logs
+      - ./logs:/app/logs
+      # Volume pour les secrets (à configurer localement)
+      - ./.streamlit:/app/.streamlit:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - baguette-network
+
+  # Service optionnel pour le monitoring (Prometheus)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: baguette-metro-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    networks:
+      - baguette-network
+    profiles:
+      - monitoring
+
+  # Service optionnel pour la base de données (si nécessaire)
+  postgres:
+    image: postgres:15-alpine
+    container_name: baguette-metro-db
+    environment:
+      POSTGRES_DB: baguette_metro
+      POSTGRES_USER: baguette_user
+      POSTGRES_PASSWORD: baguette_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - baguette-network
+    profiles:
+      - database
+
+networks:
+  baguette-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local

@@ -3,10 +3,12 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Security: Enterprise](https://img.shields.io/badge/Security-Enterprise-red.svg)](SECURITY.md)
 [![Ethics: AI Governance](https://img.shields.io/badge/Ethics-AI%20Governance-blue.svg)](AI_ETHICS_POLICY.md)
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](docker-compose.yml)
+[![Status: MVP Enterprise](https://img.shields.io/badge/Status-MVP%20Enterprise-green.svg)](docs/BUSINESS_EVALUATION.md)
 
-**Optimisez votre trajet RATP avec une pause boulangerie !**
+**🚀 MVP Enterprise Ready - Optimisez votre trajet RATP avec une pause boulangerie !**
 
-Une application intelligente qui combine les données temps réel des transports en commun (RATP) avec les informations locales des boulangeries pour optimiser vos trajets urbains.
+Une application intelligente qui combine les données temps réel des transports en commun (RATP) avec les informations locales des boulangeries pour optimiser vos trajets urbains. **Prêt pour démo et déploiement !**
 
 ## 🚀 Fonctionnalités
 
@@ -47,14 +49,30 @@ baguette-metro/
 └── scripts/                # Scripts utilitaires
 ```
 
-## 🛠️ Installation
+## 🛠️ Installation & Déploiement
 
-### Prérequis
+### 🚀 Démarrage Rapide (Docker - Recommandé)
 
-- Python 3.10+
+```bash
+# 1. Cloner le repository
+git clone <repository-url>
+cd baguette-metro
+
+# 2. Démarrer avec Docker Compose
+docker-compose up --build
+
+# 3. Accéder à l'application
+# Homepage: http://localhost:8000
+# Dashboard: http://localhost:8000/dashboard/omotenashi
+```
+
+### 🛠️ Installation Locale
+
+#### Prérequis
+- Python 3.11+
 - Docker (optionnel)
 
-### Installation locale
+#### Étapes d'installation
 
 1. **Cloner le repository**
 ```bash
@@ -75,10 +93,23 @@ source .venv/bin/activate  # Linux/Mac
 pip install -r requirements.txt
 ```
 
-4. **Configurer les variables d'environnement**
+4. **Configurer les secrets (optionnel)**
 ```bash
-cp .env.example .env
-# Éditer .env avec vos clés API
+# Créer le dossier .streamlit
+mkdir -p .streamlit
+
+# Créer le fichier secrets.toml avec vos clés API
+cat > .streamlit/secrets.toml << EOF
+OPENROUTER_API_KEY = "your_openrouter_api_key_here"
+GOOGLE_PLACES_API_KEY = "your_google_places_api_key_here"
+RATP_API_KEY = "your_ratp_api_key_here"
+SECRET_KEY = "your_secret_key_here"
+EOF
+```
+
+5. **Démarrer l'application**
+```bash
+python server_secure.py
 ```
 
 ### Variables d'environnement requises
@@ -100,27 +131,46 @@ STREAMLIT_PORT=8501
 
 ## 🚀 Utilisation
 
-### Mode développement
+### 🌐 URLs d'Accès
 
-1. **Démarrer l'API**
+Une fois l'application démarrée :
+
+- **🏠 Homepage** : http://localhost:8000
+- **📊 Dashboard** : http://localhost:8000/dashboard/omotenashi
+- **📚 API Docs** : http://localhost:8000/docs
+- **🔍 Health Check** : http://localhost:8000/health
+
+### 🎯 Fonctionnalités Principales
+
+1. **Page d'Accueil** : Calcul d'itinéraire CDG → Versailles avec boulangeries
+2. **Dashboard** : Données RATP temps réel, métriques IA, analytics
+3. **Carte Interactive** : Tracé d'itinéraire et localisation des boulangeries
+4. **Assistant IA** : Chat intelligent pour conseils de trajet
+
+### 🐳 Mode Docker (Recommandé)
+
 ```bash
-uvicorn src.api.main:app --reload --port 8000
-```
-
-2. **Démarrer l'interface**
-```bash
-streamlit run src/frontend/app.py --server.port 8501
-```
-
-3. **Accéder à l'application**
-- Interface : http://localhost:8501
-- API : http://0.0.0.0:8000
-- Documentation API : http://0.0.0.0:8000/docs
-
-### Mode Docker
-
-```bash
+# Démarrage simple
 docker-compose up --build
+
+# Démarrage en arrière-plan
+docker-compose up -d --build
+
+# Voir les logs
+docker-compose logs -f
+
+# Arrêter
+docker-compose down
+```
+
+### 🛠️ Mode Développement
+
+```bash
+# Démarrer le serveur
+python server_secure.py
+
+# Ou avec uvicorn pour le développement
+uvicorn server_secure:app --reload --port 8000
 ```
 
 ## 📊 API Endpoints
@@ -212,14 +262,26 @@ Pour utiliser les vraies données :
 2. Configurer l'URL GTFS-RT RATP
 3. Optionnel : configurer OpenAI pour des fonctionnalités avancées
 
-## 📈 Roadmap
+## 📈 Status & Roadmap
 
-- [ ] Intégration temps réel RATP GTFS-RT
-- [ ] Modèles ML pour prédiction ETA
-- [ ] Interface de chat IA
-- [ ] Support multi-villes
-- [ ] Application mobile
-- [ ] Analytics et métriques
+### ✅ MVP Enterprise - Fonctionnalités Implémentées
+
+- [x] **Intégration temps réel RATP** : Données live via API RATP
+- [x] **Modèles ML pour prédiction ETA** : Prédictions intelligentes
+- [x] **Interface de chat IA** : Assistant Mistral intégré
+- [x] **Dashboard analytique** : Métriques temps réel et IA
+- [x] **Carte interactive** : Tracé d'itinéraires et boulangeries
+- [x] **Sécurité Enterprise** : Chiffrement et validation
+- [x] **Déploiement Docker** : Containerisation complète
+- [x] **CI/CD Pipeline** : Automatisation complète
+
+### 🚀 Roadmap Future
+
+- [ ] Support multi-villes (Lyon, Marseille, Toulouse)
+- [ ] Application mobile (React Native)
+- [ ] Analytics avancées et machine learning
+- [ ] Intégration paiement pour boulangeries
+- [ ] API publique pour développeurs tiers
 
 ## 🤝 Contribution
 
