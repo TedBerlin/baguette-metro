@@ -19,7 +19,7 @@ class SmartPlacesService:
     """Service de géocodage intelligent avec cache et optimisation"""
     
     def __init__(self):
-        self.google_api_key = "AIzaSyAkduNd1Rgwqaw8l5uODMZ8R2KIbLsE3aU"
+        self.google_api_key = os.getenv("GOOGLE_PLACES_API_KEY", "")
         self.google_base_url = "https://maps.googleapis.com/maps/api/place"
         self.nominatim_url = "https://nominatim.openstreetmap.org"
         
