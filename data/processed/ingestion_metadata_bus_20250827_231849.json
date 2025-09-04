@@ -1,0 +1,8 @@
+{
+  "route_type": "bus",
+  "timestamp": "2025-08-27T23:18:49.535359",
+  "success": true,
+  "filepath": "data/processed/bus/bus_20250827_231849.parquet",
+  "record_count": 0,
+  "error": null
+}

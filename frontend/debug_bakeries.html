@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Boulangeries - Baguette & Métro</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background: #d4edda; border-color: #c3e6cb; }
+        .error { background: #f8d7da; border-color: #f5c6cb; }
+        .info { background: #d1ecf1; border-color: #bee5eb; }
+        #map { height: 400px; width: 100%; border: 1px solid #ccc; margin: 20px 0; }
+        .bakery-marker { background: transparent; border: none; font-size: 24px; text-align: center; line-height: 30px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Debug Boulangeries - Baguette & Métro</h1>
+    
+    <div class="debug-section info">
+        <h3>📋 Instructions de test</h3>
+        <p>Cette page teste l'affichage des boulangeries sur la carte :</p>
+        <ol>
+            <li>✅ Carte Leaflet initialisée</li>
+            <li>✅ Appel API ETA</li>
+            <li>✅ Récupération des boulangeries</li>
+            <li>✅ Affichage des marqueurs sur la carte</li>
+        </ol>
+    </div>
+
+    <div class="debug-section">
+        <h3>🔧 Test API ETA</h3>
+        <button onclick="testETA()">Tester l'API ETA</button>
+        <div id="api-result"></div>
+    </div>
+
+    <div class="debug-section">
+        <h3>🗺️ Test Carte avec Boulangeries</h3>
+        <button onclick="testMapWithBakeries()">Tester la carte avec boulangeries</button>
+        <div id="map-result"></div>
+    </div>
+
+    <div class="debug-section">
+        <h3>🗺️ Carte de test</h3>
+        <div id="map"></div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        let map;
+        let bakeryMarkers = [];
+
+        // Initialisation de la carte
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                map = L.map('map').setView([48.8566, 2.3522], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(map);
+                
+                console.log('✅ Carte Leaflet initialisée');
+            } catch (error) {
+                console.error('❌ Erreur carte:', error);
+            }
+        });
+
+        // Test de l'API ETA
+        async function testETA() {
+            const resultDiv = document.getElementById('api-result');
+            resultDiv.innerHTML = '🔄 Test en cours...';
+            
+            try {
+                const response = await fetch('http://localhost:8000/eta/calculate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        start_address: 'Paris Gare de Lyon',
+                        end_address: 'Tour Eiffel',
+                        language: 'fr'
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h4>✅ API ETA fonctionne</h4>
+                            <p><strong>Départ:</strong> ${data.start_address}</p>
+                            <p><strong>Arrivée:</strong> ${data.end_address}</p>
+                            <p><strong>Durée:</strong> ${data.eta}</p>
+                            <p><strong>Distance:</strong> ${data.distance}</p>
+                            <p><strong>Boulangeries:</strong> ${data.bakeries ? data.bakeries.length : 0}</p>
+                            <pre>${JSON.stringify(data.bakeries, null, 2)}</pre>
+                        </div>
+                    `;
+                    
+                    // Tester l'affichage sur la carte
+                    if (data.bakeries && data.bakeries.length > 0) {
+                        testMapWithBakeries(data.bakeries);
+                    }
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Erreur API: ${response.status}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Erreur: ${error.message}</div>`;
+            }
+        }
+
+        // Test de la carte avec boulangeries
+        function testMapWithBakeries(bakeries = null) {
+            const resultDiv = document.getElementById('map-result');
+            
+            if (!bakeries) {
+                // Données de test
+                bakeries = [
+                    { name: "Boulangerie Test 1", distance: "200m", rating: 4.5 },
+                    { name: "Boulangerie Test 2", distance: "350m", rating: 4.2 }
+                ];
+            }
+            
+            try {
+                // Nettoyer les anciens marqueurs
+                bakeryMarkers.forEach(marker => map.removeLayer(marker));
+                bakeryMarkers = [];
+                
+                // Ajouter les nouveaux marqueurs
+                bakeries.forEach((bakery, index) => {
+                    // Position simulée autour de Paris
+                    const lat = 48.8566 + (Math.random() - 0.5) * 0.01;
+                    const lng = 2.3522 + (Math.random() - 0.5) * 0.01;
+                    
+                    const bakeryIcon = L.divIcon({
+                        className: 'bakery-marker',
+                        html: '🥖',
+                        iconSize: [30, 30]
+                    });
+                    
+                    const marker = L.marker([lat, lng], { icon: bakeryIcon })
+                        .addTo(map)
+                        .bindPopup(`
+                            <div class="bakery-popup">
+                                <h4>${bakery.name}</h4>
+                                <p>📍 ${bakery.distance}</p>
+                                <p>⭐ ${bakery.rating}/5</p>
+                            </div>
+                        `);
+                    
+                    bakeryMarkers.push(marker);
+                });
+                
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <h4>✅ Marqueurs de boulangeries ajoutés</h4>
+                        <p>Nombre de marqueurs: ${bakeryMarkers.length}</p>
+                        <p>Marqueurs visibles sur la carte avec icône 🥖</p>
+                    </div>
+                `;
+                
+                console.log(`✅ ${bakeryMarkers.length} marqueurs de boulangeries ajoutés`);
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Erreur carte: ${error.message}</div>`;
+                console.error('❌ Erreur ajout marqueurs:', error);
+            }
+        }
+    </script>
+</body>
+</html>
+
+

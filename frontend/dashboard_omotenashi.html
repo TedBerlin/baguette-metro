@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚇 Dashboard Omotenashi - Baguette & Métro</title>
+    <link rel="stylesheet" href="/css/dashboard_omotenashi.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- 🚇 Script Citymapper Simulated Data -->
+    <script src="/js/citymapper_simulated_data.js"></script>
+</head>
+<body>
+    <!-- 🎯 HEADER OMOTENASHI -->
+    <header class="dashboard-header">
+        <div class="header-content">
+            <h1>🚇 Dashboard Omotenashi</h1>
+            <p class="subtitle">Anticipation intelligente des besoins voyageurs</p>
+            <div class="last-update">
+                <span>🕐 Dernière mise à jour:</span>
+                <span id="lastUpdate">--</span>
+                <span id="dataSource" class="data-source">📡 Données RATP Réelles</span>
+                <button id="refreshCitymapperData" class="btn-refresh" title="Rafraîchir les données RATP réelles">
+                    🔄 Données Réelles
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 🥇 PRIORITÉ MAXIMALE - Métriques Permanentes -->
+    <section class="priority-max">
+        <h2>🥇 Métriques Critiques</h2>
+        
+        <!-- 🚇 État du Réseau RATP -->
+        <div class="metric-card ratp-status">
+            <div class="metric-header">
+                <h3>🚇 État du Réseau RATP</h3>
+                <div class="status-indicator" id="ratpStatusIndicator">🟡</div>
+            </div>
+            <div class="metric-content">
+                <div class="metric-item">
+                    <span class="label">Ponctualité Globale:</span>
+                    <span class="value" id="ponctualiteGlobale">--</span>
+                </div>
+                <div class="metric-item">
+                    <span class="label">Total Lignes:</span>
+                    <span class="value" id="totalLines">--</span>
+                </div>
+                <div class="metric-item">
+                    <span class="label">Lignes Perturbées:</span>
+                    <span class="value" id="lignesPerturbees">--</span>
+                </div>
+                <div class="lignes-list" id="lignesList">
+                    <!-- Liste dynamique des lignes -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ⏱ Temps de Trajet -->
+        <div class="metric-card travel-time">
+            <div class="metric-header">
+                <h3>⏱ Temps de Trajet</h3>
+            </div>
+            <div class="metric-content">
+                <div class="metric-item">
+                    <span class="label">Trajet Direct:</span>
+                    <span class="value" id="trajetDirect">--</span>
+                </div>
+                <div class="metric-item">
+                    <span class="label">Avec Détour Boulangerie:</span>
+                    <span class="value" id="detourBoulangerie">--</span>
+                </div>
+                <div class="metric-item highlight">
+                    <span class="label">Gain vs Citymapper:</span>
+                    <span class="value" id="gainCitymapper">--</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🥖 Points d'Intérêt Boulangerie -->
+        <div class="metric-card bakery-info">
+            <div class="metric-header">
+                <h3>🥖 Points d'Intérêt Boulangerie</h3>
+            </div>
+            <div class="metric-content">
+                <div class="metric-item">
+                    <span class="label">Distance Station:</span>
+                    <span class="value" id="distanceStation">--</span>
+                </div>
+                <div class="metric-item">
+                    <span class="label">Note Google:</span>
+                    <span class="value" id="noteGoogle">--</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 🥈 PRIORITÉ SECONDAIRE - Métriques en Clic -->
+    <section class="priority-secondary">
+        <h2>🥈 Détails en Clic</h2>
+        
+        <!-- 📊 Détail d'une Ligne -->
+        <div class="metric-card line-detail" id="lineDetailCard" style="display: none;">
+            <div class="metric-header">
+                <h3>📊 Détail Ligne <span id="selectedLineName">--</span></h3>
+                <button class="close-btn" onclick="hideLineDetail()">✕</button>
+            </div>
+            <div class="metric-content">
+                <div class="metric-item">
+                    <span class="label">Prochain Passage:</span>
+                    <span class="value" id="prochainPassage">--</span>
+                </div>
+                <div class="metric-item">
+                    <span class="label">Cause Retard:</span>
+                    <span class="value" id="causeRetard">--</span>
+                </div>
+                <div class="metric-item">
+                    <span class="label">Affluence:</span>
+                    <div class="heatmap" id="affluenceHeatmap">
+                        <div class="heatmap-bar" data-level="1"></div>
+                        <div class="heatmap-bar" data-level="2"></div>
+                        <div class="heatmap-bar" data-level="3"></div>
+                        <div class="heatmap-bar" data-level="4"></div>
+                        <div class="heatmap-bar" data-level="5"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🏪 Détail Boulangerie -->
+        <div class="metric-card bakery-detail" id="bakeryDetailCard" style="display: none;">
+            <div class="metric-header">
+                <h3>🏪 Détail Boulangerie</h3>
+                <button class="close-btn" onclick="hideBakeryDetail()">✕</button>
+            </div>
+            <div class="metric-content">
+                <div class="metric-item">
+                    <span class="label">Horaires:</span>
+                    <span class="value" id="horairesBoulangerie">--</span>
+                </div>
+                <div class="metric-item">
+                    <span class="label">Recommandation IA:</span>
+                    <span class="value" id="recommandationIA">--</span>
+                </div>
+                <div class="metric-item">
+                    <span class="label">Conseil Heures:</span>
+                    <span class="value" id="conseilHeures">--</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 🥉 PRIORITÉ TERTIAIRE - Analytics & Performance -->
+    <section class="priority-tertiary">
+        <h2>🥉 Analytics & Performance</h2>
+        
+        <!-- 🤖 Performance IA -->
+        <div class="metric-card ai-performance">
+            <div class="metric-header">
+                <h3>🤖 Performance IA</h3>
+            </div>
+            <div class="metric-content">
+                <div class="metric-item">
+                    <span class="label">Temps Réponse:</span>
+                    <span class="value" id="tempsReponseIA">--</span>
+                </div>
+                <div class="metric-item">
+                    <span class="label">Précision Conseils:</span>
+                    <span class="value" id="precisionConseils">--</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 📈 Analytics Utilisateur -->
+        <div class="metric-card user-analytics">
+            <div class="metric-header">
+                <h3>📈 Analytics Utilisateur</h3>
+            </div>
+            <div class="metric-content">
+                <div class="metric-item">
+                    <span class="label">Requêtes par Langue:</span>
+                    <div class="language-chart" id="languageChart">
+                        <canvas id="languageChartCanvas"></canvas>
+                    </div>
+                </div>
+                <div class="metric-item">
+                    <span class="label">Taux Conversion:</span>
+                    <span class="value" id="tauxConversion">--</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🌍 Couverture Réseau -->
+        <div class="metric-card network-coverage">
+            <div class="metric-header">
+                <h3>🌍 Couverture Réseau</h3>
+            </div>
+            <div class="metric-content">
+                <div class="metric-item">
+                    <span class="label">Stations avec Boulangeries:</span>
+                    <span class="value" id="stationsBoulangeries">--</span>
+                </div>
+                <div class="metric-item">
+                    <span class="label">Qualité Moyenne:</span>
+                    <span class="value" id="qualiteMoyenne">--</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 🔄 RÉFRESH & ACTIONS -->
+    <section class="actions-section">
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="refreshDashboard()">
+                🔄 Actualiser Dashboard
+            </button>
+            <button class="btn btn-secondary" onclick="exportData()">
+                📊 Exporter Données
+            </button>
+        </div>
+    </section>
+
+    <!-- 📊 FOOTER -->
+    <footer class="dashboard-footer">
+        <p>🚇 Dashboard Omotenashi - Baguette & Métro Enterprise</p>
+        <p>Anticipation intelligente des besoins voyageurs</p>
+    </footer>
+
+    <script src="/js/dashboard-transmitter.js"></script>
+    <script src="/js/dashboard_omotenashi.js"></script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Interface Enterprise avec carte interactive, données temps réel et conseils IA Mistral">
+    <title>🥖 Baguette & Métro - Interface Enterprise Avancée</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Header avec navigation -->
+    <header class="header">
+        <h1>🥖 Baguette & Métro</h1>
+        <p>Interface Enterprise avec carte interactive, données temps réel et conseils IA Mistral</p>
+        <div class="language-selector">
+            <button class="lang-btn active" data-lang="fr">FR</button>
+            <button class="lang-btn" data-lang="en">EN</button>
+            <button class="lang-btn" data-lang="ja">日本語</button>
+        </div>
+    </header>
+
+    <!-- Conteneur principal -->
+    <main class="container">
+        <!-- Section de saisie -->
+        <section class="input-section">
+            <div class="input-group">
+                <label for="start-input">📍 Départ</label>
+                <input type="text" id="start-input" placeholder="Votre position de départ">
+                <div id="start-suggestions" class="suggestions-container"></div>
+            </div>
+            <div class="input-group">
+                <label for="end-input">🎯 Destination</label>
+                <input type="text" id="end-input" placeholder="Votre destination">
+                <div id="end-suggestions" class="suggestions-container"></div>
+            </div>
+            <button id="calculate-btn" class="primary-btn">🚀 Calculer l'itinéraire optimal</button>
+        </section>
+
+        <!-- Carte interactive -->
+        <section class="map-section">
+            <h2>🗺️ Votre trajet</h2>
+            <div id="map" style="height: 400px; width: 100%;"></div>
+        </section>
+
+        <!-- Résultats et recommandations -->
+        <section class="results-section">
+            <h2>📊 Résultats</h2>
+            <div id="results-container"></div>
+        </section>
+
+        <!-- Assistant IA -->
+        <section class="assistant-section">
+            <h2>🤖 Assistant Conciergerie</h2>
+            <div class="chat-container">
+                <div id="chat-messages" class="chat-messages"></div>
+                <div class="chat-input">
+                    <input type="text" id="message-input" placeholder="Posez votre question...">
+                    <button id="send-btn">➤</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>Projet BootCamp GenAI & ML - Solution de mobilité urbaine intelligente</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="js/app_integrated.js"></script>
+</body>
+</html>

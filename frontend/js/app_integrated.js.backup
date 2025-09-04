@@ -1,0 +1,524 @@
+// Configuration de l'application avec intégration API réelle
+const CONFIG = {
+    API_BASE_URL: 'http://0.0.0.0:8000',
+    DEFAULT_LAT: 48.8566,
+    DEFAULT_LNG: 2.3522,
+    DEFAULT_ZOOM: 13
+};
+
+// Configuration de l'auto-complétion
+const AUTOCOMPLETE_CONFIG = {
+    MIN_QUERY_LENGTH: 3,
+    DEBOUNCE_DELAY: 300,
+    MAX_SUGGESTIONS: 5
+};
+
+// Variables globales
+let map;
+let currentLanguage = 'fr';
+let markers = [];
+
+// Traductions
+const translations = {
+    fr: {
+        departure: 'Départ',
+        destination: 'Destination',
+        calculate: 'Calculer l\'itinéraire optimal',
+        yourRoute: 'Votre trajet',
+        results: 'Résultats',
+        assistant: 'Assistant Conciergerie',
+        askQuestion: 'Posez votre question...',
+        loading: 'Chargement...',
+        error: 'Erreur',
+        noResults: 'Aucun résultat trouvé',
+        apiError: 'Erreur de connexion à l\'API'
+    },
+    en: {
+        departure: 'Departure',
+        destination: 'Destination',
+        calculate: 'Calculate optimal route',
+        yourRoute: 'Your route',
+        results: 'Results',
+        assistant: 'Concierge Assistant',
+        askQuestion: 'Ask your question...',
+        loading: 'Loading...',
+        error: 'Error',
+        noResults: 'No results found',
+        apiError: 'API connection error'
+    },
+    ja: {
+        departure: '出発',
+        destination: '目的地',
+        calculate: '最適ルートを計算',
+        yourRoute: 'あなたのルート',
+        results: '結果',
+        assistant: 'コンシェルジュアシスタント',
+        askQuestion: '質問してください...',
+        loading: '読み込み中...',
+        error: 'エラー',
+        noResults: '結果が見つかりません',
+        apiError: 'API接続エラー'
+    }
+};
+
+// Initialisation de l'application
+document.addEventListener('DOMContentLoaded', function() {
+    initializeMap();
+    setupEventListeners();
+    setupLanguageSelector();
+    addWelcomeMessage();
+    testAPIConnection();
+});
+
+// Test de connexion aux APIs
+async function testAPIConnection() {
+    try {
+        const response = await fetch(`${CONFIG.API_BASE_URL}/health`);
+        if (response.ok) {
+            console.log('✅ API FastAPI connectée');
+            addChatMessage('assistant', '✅ Connexion aux APIs établie. Toutes les fonctionnalités sont opérationnelles !');
+        } else {
+            throw new Error('API non accessible');
+        }
+    } catch (error) {
+        console.error('❌ Erreur API:', error);
+        addChatMessage('assistant', '⚠️ APIs non accessibles. Mode démo activé avec données simulées.');
+    }
+}
+
+// Configuration de l'auto-complétion
+function setupAutocomplete(inputId, suggestionsId) {
+    const input = document.getElementById(inputId);
+    const suggestionsContainer = document.getElementById(suggestionsId);
+    
+    if (!input || !suggestionsContainer) {
+        console.warn(`Auto-complétion non configurée pour ${inputId}`);
+        return;
+    }
+    
+    let debounceTimer;
+    
+    input.addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        const query = this.value.trim();
+        
+        if (query.length < AUTOCOMPLETE_CONFIG.MIN_QUERY_LENGTH) {
+            hideSuggestions(suggestionsContainer);
+            return;
+        }
+        
+        debounceTimer = setTimeout(() => {
+            searchAddresses(query, suggestionsContainer, input);
+        }, AUTOCOMPLETE_CONFIG.DEBOUNCE_DELAY);
+    });
+    
+    // Masquer les suggestions en cliquant ailleurs
+    document.addEventListener('click', function(e) {
+        if (!input.contains(e.target) && !suggestionsContainer.contains(e.target)) {
+            hideSuggestions(suggestionsContainer);
+        }
+    });
+}
+
+// Recherche d'adresses avec service hybride intelligent
+async function searchAddresses(query, suggestionsContainer, input) {
+    try {
+        // Utiliser notre service hybride intelligent
+        const response = await fetch(
+            `${CONFIG.API_BASE_URL}/places/autocomplete?query=${encodeURIComponent(query)}&limit=${AUTOCOMPLETE_CONFIG.MAX_SUGGESTIONS}`
+        );
+        
+        if (!response.ok) {
+            throw new Error('Erreur de recherche d\'adresses');
+        }
+        
+        const data = await response.json();
+        
+        if (data.predictions && data.predictions.length > 0) {
+            showSuggestions(data.predictions, suggestionsContainer, input);
+        } else {
+            // Fallback vers OpenStreetMap direct si pas de résultats
+            console.log('🔄 Fallback vers OpenStreetMap direct');
+            const fallbackResponse = await fetch(
+                `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=${AUTOCOMPLETE_CONFIG.MAX_SUGGESTIONS}&countrycodes=fr&accept-language=fr,en`
+            );
+            
+            if (fallbackResponse.ok) {
+                const fallbackData = await fallbackResponse.json();
+                showSuggestions(fallbackData, suggestionsContainer, input);
+            } else {
+                showSuggestions([], suggestionsContainer, input);
+            }
+        }
+        
+    } catch (error) {
+        console.error('Erreur recherche adresses:', error);
+        showSuggestions([], suggestionsContainer, input);
+    }
+}
+
+// Affichage des suggestions
+function showSuggestions(suggestions, container, input) {
+    container.innerHTML = '';
+    
+    if (suggestions.length === 0) {
+        container.innerHTML = '<div class="suggestion-item no-results">Aucune suggestion trouvée</div>';
+        container.style.display = 'block';
+        return;
+    }
+    
+    suggestions.forEach(suggestion => {
+        const item = document.createElement('div');
+        item.className = 'suggestion-item';
+        item.textContent = suggestion.display_name;
+        
+        item.addEventListener('click', () => {
+            selectSuggestion(suggestion, input, container);
+        });
+        
+        container.appendChild(item);
+    });
+    
+    container.style.display = 'block';
+}
+
+// Sélection d'une suggestion
+function selectSuggestion(suggestion, input, container) {
+    input.value = suggestion.display_name;
+    hideSuggestions(container);
+    
+    // Mettre à jour la carte avec la position
+    const lat = parseFloat(suggestion.lat);
+    const lon = parseFloat(suggestion.lon);
+    
+    if (!isNaN(lat) && !isNaN(lon)) {
+        // Ajouter un marqueur sur la carte
+        const markerType = input.id === 'start-input' ? '🚀' : '🎯';
+        addMarker(lat, lon, suggestion.display_name, markerType, input.id);
+        
+        // Centrer la carte sur la position
+        map.setView([lat, lon], 15);
+        
+        console.log(`Position sélectionnée: ${suggestion.display_name} (${lat}, ${lon})`);
+    }
+}
+
+// Masquer les suggestions
+function hideSuggestions(container) {
+    container.style.display = 'none';
+}
+
+// Initialisation de la carte Leaflet
+function initializeMap() {
+    map = L.map('map').setView([CONFIG.DEFAULT_LAT, CONFIG.DEFAULT_LNG], CONFIG.DEFAULT_ZOOM);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+    
+    // Ajouter un marqueur par défaut (Paris)
+    addMarker(CONFIG.DEFAULT_LAT, CONFIG.DEFAULT_LNG, 'Paris', '🏛️');
+}
+
+// Configuration des écouteurs d'événements
+function setupEventListeners() {
+    // Bouton de calcul d'itinéraire
+    document.getElementById('calculate-btn').addEventListener('click', calculateRoute);
+    
+    // Bouton d'envoi de message
+    document.getElementById('send-btn').addEventListener('click', sendMessage);
+    
+    // Auto-complétion pour les champs de saisie
+    setupAutocomplete('start-input', 'start-suggestions');
+    setupAutocomplete('end-input', 'end-suggestions');
+    
+    // Écouteurs pour les champs de saisie (mise à jour en temps réel)
+    document.getElementById('start-input').addEventListener('input', updateJourneyDisplay);
+    document.getElementById('end-input').addEventListener('input', updateJourneyDisplay);
+    
+    // Entrée dans le champ de message
+    document.getElementById('message-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
+
+    // Auto-complétion Google Places
+    setupGooglePlacesAutocomplete();
+}
+
+// Configuration de l'auto-complétion Google Places
+function setupGooglePlacesAutocomplete() {
+    const startInput = document.getElementById('start-input');
+    const endInput = document.getElementById('end-input');
+    
+    // Auto-complétion avec l'API Google Places
+    startInput.addEventListener('input', function() {
+        if (this.value.length > 2) {
+            showAutocompleteSuggestions(this, this.value);
+        }
+    });
+    
+    endInput.addEventListener('input', function() {
+        if (this.value.length > 2) {
+            showAutocompleteSuggestions(this, this.value);
+        }
+    });
+}
+
+// Affichage des suggestions d'auto-complétion avec API réelle
+async function showAutocompleteSuggestions(input, query) {
+    try {
+        // Appel à l'API backend
+        const response = await fetch(`${CONFIG.API_BASE_URL}/places/autocomplete?query=${encodeURIComponent(query)}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        
+        // Utiliser les vraies suggestions de l'API
+        const suggestions = data.predictions || [];
+        
+        // Créer la liste de suggestions
+        let suggestionList = input.parentNode.querySelector('.suggestions');
+        if (!suggestionList) {
+            suggestionList = document.createElement('ul');
+            suggestionList.className = 'suggestions';
+            input.parentNode.appendChild(suggestionList);
+        }
+        
+        if (suggestions.length === 0) {
+            suggestionList.innerHTML = '<li class="no-results">Aucune suggestion trouvée</li>';
+            return;
+        }
+        
+        suggestionList.innerHTML = suggestions.map(suggestion => 
+            `<li onclick="selectSuggestion('${input.id}', '${suggestion.description}', ${suggestion.lat}, ${suggestion.lon})">
+                <span class="suggestion-text">${suggestion.description}</span>
+                <span class="suggestion-source">Google Places</span>
+            </li>`
+        ).join('');
+        
+    } catch (error) {
+        console.error('Erreur auto-complétion:', error);
+        // Afficher un message d'erreur au lieu du fallback simulé
+        let suggestionList = input.parentNode.querySelector('.suggestions');
+        if (!suggestionList) {
+            suggestionList = document.createElement('ul');
+            suggestionList.className = 'suggestions';
+            input.parentNode.appendChild(suggestionList);
+        }
+        
+        suggestionList.innerHTML = '<li class="error">Erreur de connexion à l\'API Google Places</li>';
+    }
+}
+
+// Sélection d'une suggestion avec géocodage
+async function selectSuggestion(inputId, value, lat = null, lon = null) {
+    document.getElementById(inputId).value = value;
+    document.querySelectorAll('.suggestions').forEach(list => list.remove());
+    
+    // Si on a des coordonnées, mettre à jour la carte
+    if (lat && lon) {
+        // Supprimer les anciens marqueurs
+        markers.forEach(marker => map.removeLayer(marker));
+        markers = [];
+        
+        // Ajouter le nouveau marqueur
+        const marker = L.marker([lat, lon]).addTo(map);
+        markers.push(marker);
+        
+        // Centrer la carte sur le marqueur
+        map.setView([lat, lon], 15);
+        
+        // Ajouter un popup avec l'adresse
+        marker.bindPopup(value).openPopup();
+    }
+}
+
+// Configuration du sélecteur de langue
+function setupLanguageSelector() {
+    const langButtons = document.querySelectorAll('.lang-btn');
+    
+    langButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const lang = this.dataset.lang;
+            changeLanguage(lang);
+            
+            // Mettre à jour l'état actif
+            langButtons.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+}
+
+// Changement de langue
+function changeLanguage(lang) {
+    currentLanguage = lang;
+    updateUIText();
+}
+
+// Mise à jour du texte de l'interface
+function updateUIText() {
+    const t = translations[currentLanguage];
+    
+    // Mettre à jour les labels
+    document.querySelector('label[for="start-input"]').textContent = t.departure;
+    document.querySelector('label[for="end-input"]').textContent = t.destination;
+    document.getElementById('calculate-btn').textContent = t.calculate;
+    document.querySelector('.map-section h2').textContent = t.yourRoute;
+    document.querySelector('.results-section h2').textContent = t.results;
+    document.querySelector('.assistant-section h2').textContent = t.assistant;
+    document.getElementById('message-input').placeholder = t.askQuestion;
+}
+
+// Calcul d'itinéraire avec API réelle
+async function calculateRoute() {
+    const start = document.getElementById('start-input').value.trim();
+    const end = document.getElementById('end-input').value.trim();
+    
+    if (!start || !end) {
+        showError('Veuillez remplir les champs de départ et d\'arrivée');
+        return;
+    }
+    
+    showLoading('Calcul de l\'itinéraire en cours...');
+    
+    try {
+        console.log('🔄 Début du calcul d\'itinéraire...');
+        const routeData = await callRealRouteAPI(start, end);
+        
+        if (routeData) {
+            console.log('✅ Données ETA reçues:', routeData);
+            console.log('🥖 Boulangeries trouvées:', routeData.bakeries);
+            
+            displayRealResults(routeData);
+            addRouteMarkers(start, end, routeData);
+            
+            // CORRECTION: S'assurer que addBakeryMarkers est appelée
+            if (routeData.bakeries && routeData.bakeries.length > 0) {
+                console.log('🗺️ Ajout des marqueurs de boulangeries...');
+                addBakeryMarkers(routeData.bakeries);
+            } else {
+                console.log('⚠️ Aucune boulangerie trouvée dans les données');
+            }
+        } else {
+            console.log('⚠️ API non accessible, utilisation du mode simulation');
+            await simulateRouteCalculation(start, end);
+            addRouteMarkers(start, end);
+            displayResults(start, end);
+        }
+    } catch (error) {
+        console.error('❌ Erreur calcul itinéraire:', error);
+        showError('Erreur lors du calcul de l\'itinéraire');
+    }
+}
+
+// Appel à l'API réelle de calcul d'itinéraire
+async function callRealRouteAPI(start, end) {
+    try {
+        const response = await fetch(`${CONFIG.API_BASE_URL}/eta/calculate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                start_address: start, 
+                end_address: end, 
+                language: currentLanguage 
+            })
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            console.log('✅ Données ETA reçues:', data);
+            return data;
+        } else {
+            console.log('❌ Erreur API ETA:', response.status);
+            return null;
+        }
+    } catch (error) {
+        console.log('❌ Erreur connexion API ETA:', error);
+        return null;
+    }
+}
+
+// Affichage des résultats réels de l'API
+function displayRealResults(routeData) {
+    const container = document.getElementById('results-container');
+    
+    // Traduction des labels selon la langue
+    const labels = getLabelsForLanguage(currentLanguage);
+    
+    container.innerHTML = `
+        <div class="result-item">
+            <h3>🚀 ${labels.itineraryCalculated}</h3>
+            <p><strong>${labels.departure}:</strong> ${routeData.start_address || 'N/A'}</p>
+            <p><strong>${labels.arrival}:</strong> ${routeData.end_address || 'N/A'}</p>
+            <p><strong>${labels.estimatedDuration}:</strong> ${routeData.eta || 'N/A'}</p>
+            <p><strong>${labels.distance}:</strong> ${routeData.distance || 'N/A'}</p>
+        </div>
+        <div class="result-item">
+            <h3>🥖 ${labels.bakeriesOnRoute}</h3>
+            ${routeData.bakeries && routeData.bakeries.length > 0 ? 
+                routeData.bakeries.map(b => `<p>• ${b.name} (${b.distance}) ⭐ ${b.rating}</p>`).join('') : 
+                `<p>• ${labels.searchingBakeries}</p>`
+            }
+        </div>
+        <div class="result-item">
+            <h3>🚇 ${labels.publicTransport}</h3>
+            ${routeData.transport && routeData.transport.length > 0 ? 
+                routeData.transport.map(t => `<p>• ${t.line}: ${t.wait_time} ${labels.wait} (${t.duration})</p>`).join('') : 
+                `<p>• ${labels.metroLine1}: 3 ${labels.minWait}</p>`
+            }
+        </div>
+    `;
+}
+
+// Ajouter les marqueurs de boulangeries sur la carte
+function addBakeryMarkers(bakeries) {
+    if (!bakeries || !map) {
+        console.log('❌ addBakeryMarkers: bakeries ou map manquant');
+        return;
+    }
+    
+    console.log(`🗺️ Ajout de ${bakeries.length} marqueurs de boulangeries`);
+    
+    // Supprimer les anciens marqueurs de boulangeries
+    if (window.bakeryMarkers) {
+        window.bakeryMarkers.forEach(marker => map.removeLayer(marker));
+    }
+    
+    window.bakeryMarkers = [];
+    
+    bakeries.forEach((bakery, index) => {
+        // Position simulée (à remplacer par de vraies coordonnées)
+        const lat = CONFIG.DEFAULT_LAT + (Math.random() - 0.5) * 0.01;
+        const lng = CONFIG.DEFAULT_LNG + (Math.random() - 0.5) * 0.01;
+        
+        const bakeryIcon = L.divIcon({
+            className: 'bakery-marker',
+            html: '🥖',
+            iconSize: [30, 30]
+        });
+        
+        const marker = L.marker([lat, lng], { icon: bakeryIcon })
+            .addTo(map)
+            .bindPopup(`
+                <div class="bakery-popup">
+                    <h4>${bakery.name}</h4>
+                    <p>📍 ${bakery.distance}</p>
+                    <p>⭐ ${bakery.rating}/5</p>
+                    <button onclick="showBakeryRoute(${lat}, ${lng})">${getLabelsForLanguage(currentLanguage).showRoute}</button>
+                </div>
+            `);
+        
+        window.bakeryMarkers.push(marker);
+        console.log(`✅ Marqueur boulangerie ajouté: ${bakery.name} à [${lat}, ${lng}]`);
+    });
+    
+    console.log(`

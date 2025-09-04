@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baguette & Métro - Interface Enterprise</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-bread-slice"></i> Baguette & Métro</h1>
+            <p>Assistant IA Enterprise pour Transport & Boulangeries Artisanales</p>
+            
+            <!-- Sélecteur de langue -->
+            <div class="language-selector">
+                <button class="lang-btn active" data-lang="fr">🇫🇷 Français</button>
+                <button class="lang-btn" data-lang="en">🇬🇧 English</button>
+                <button class="lang-btn" data-lang="ja">🇯🇵 日本語</button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="container">
+            <!-- Section de saisie -->
+            <section class="input-section">
+                <form id="routeForm">
+                    <div class="input-group">
+                        <label for="startAddress">Adresse de départ</label>
+                        <input type="text" id="startAddress" placeholder="Ex: Châtelet" required>
+                        <div class="suggestions-container" id="startSuggestions"></div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="endAddress">Adresse d'arrivée</label>
+                        <input type="text" id="endAddress" placeholder="Ex: Gare du Nord" required>
+                        <div class="suggestions-container" id="endSuggestions"></div>
+                    </div>
+
+                    <button type="submit" class="primary-btn" id="calculateBtn">
+                        <i class="fas fa-route"></i> Calculer l'Itinéraire
+                    </button>
+                </form>
+            </section>
+
+            <!-- Section carte -->
+            <section class="map-section">
+                <h2><i class="fas fa-map-marked-alt"></i> Carte Interactive</h2>
+                <div id="map"></div>
+            </section>
+        </div>
+
+        <!-- Results Panel -->
+        <section class="results-section" id="resultsPanel" style="display: none;">
+            <h2><i class="fas fa-chart-line"></i> Résultats du Trajet</h2>
+            
+            <!-- Route Information -->
+            <div id="routeInfo">
+                <!-- Dynamically populated -->
+            </div>
+
+            <!-- Transport Details -->
+            <div id="transportDetails">
+                <h3><i class="fas fa-subway"></i> Détails du Transport</h3>
+                <div id="transportSteps">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+
+            <!-- Bakeries Section -->
+            <div id="bakeriesSection">
+                <h3><i class="fas fa-bread-slice"></i> Boulangeries Artisanales</h3>
+                <div id="bakeriesList">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+
+            <!-- AI Advice -->
+            <div class="chat-container" id="aiAdvice">
+                <h3><i class="fas fa-robot"></i> Conseils IA</h3>
+                <div class="chat-messages" id="aiContent">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Main Application Script -->
+    <script src="js/app_advanced.js"></script>
+</body>
+</html>

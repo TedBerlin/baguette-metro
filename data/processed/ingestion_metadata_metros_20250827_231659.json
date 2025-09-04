@@ -1,0 +1,8 @@
+{
+  "route_type": "metros",
+  "timestamp": "2025-08-27T23:16:59.376657",
+  "success": true,
+  "filepath": "data/processed/metro/metros_20250827_231659.parquet",
+  "record_count": 0,
+  "error": null
+}

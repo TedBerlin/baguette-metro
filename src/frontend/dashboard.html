@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Baguette & Métro</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <h1>🚇 Dashboard Baguette & Métro</h1>
+            <p class="subtitle">Données temps réel et analyses</p>
+            <div class="last-update">
+                Dernière mise à jour: <span id="last-update-time">--</span>
+            </div>
+        </header>
+
+        <!-- Métriques principales -->
+        <section class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-icon">🛤️</div>
+                <div class="metric-value" id="total-routes">--</div>
+                <div class="metric-label">Itinéraires calculés</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon">👥</div>
+                <div class="metric-value" id="active-users">--</div>
+                <div class="metric-label">Utilisateurs actifs</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon">🥖</div>
+                <div class="metric-value" id="bakeries-found">--</div>
+                <div class="metric-label">Boulangeries trouvées</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon">🌱</div>
+                <div class="metric-value" id="eco-percentage">--</div>
+                <div class="metric-label">Routes éco-responsables</div>
+            </div>
+        </section>
+
+        <!-- Graphiques -->
+        <section class="charts-section">
+            <div class="chart-container">
+                <h3>📊 Temps de trajet moyen</h3>
+                <canvas id="journey-chart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>🚇 État des lignes RATP</h3>
+                <canvas id="ratp-status-chart"></canvas>
+            </div>
+        </section>
+
+        <!-- État RATP en temps réel -->
+        <section class="ratp-section">
+            <h2>🚇 État du réseau RATP</h2>
+            <div class="ratp-grid">
+                <div class="ratp-card">
+                    <h4>Lignes en service</h4>
+                    <div id="ratp-lines-status" class="status-list"></div>
+                </div>
+                <div class="ratp-card">
+                    <h4>Affluence des stations</h4>
+                    <div id="ratp-crowding" class="crowding-list"></div>
+                </div>
+                <div class="ratp-card">
+                    <h4>Retards et perturbations</h4>
+                    <div id="ratp-delays" class="delays-list"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Comparaison Citymapper -->
+        <section class="citymapper-section">
+            <h2>🗺️ Comparaison des itinéraires (Citymapper)</h2>
+            <div class="routes-comparison" id="routes-comparison"></div>
+        </section>
+
+        <!-- Mises à jour temps réel -->
+        <section class="updates-section">
+            <h2>🔄 Mises à jour temps réel</h2>
+            <div class="updates-list" id="real-time-updates"></div>
+        </section>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>

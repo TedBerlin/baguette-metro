@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Baguette & Métro</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <h1>🚇 Dashboard Baguette & Métro</h1>
+            <div class="header-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Statut</span>
+                    <span class="stat-value status-excellent">Excellent</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Dernière MAJ</span>
+                    <span class="stat-value" id="last-update">--</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Métriques principales -->
+        <section class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-icon">🚌</div>
+                <div class="metric-content">
+                    <h3>Véhicules actifs</h3>
+                    <div class="metric-value" id="total-vehicles">--</div>
+                    <div class="metric-change positive">+2.5%</div>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon">🛤️</div>
+                <div class="metric-content">
+                    <h3>Lignes actives</h3>
+                    <div class="metric-value" id="active-lines">--</div>
+                    <div class="metric-change neutral">0%</div>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon">⚡</div>
+                <div class="metric-content">
+                    <h3>Vitesse moyenne</h3>
+                    <div class="metric-value" id="avg-speed">-- km/h</div>
+                    <div class="metric-change positive">+1.2%</div>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon">📊</div>
+                <div class="metric-content">
+                    <h3>Satisfaction</h3>
+                    <div class="metric-value" id="satisfaction">--/5</div>
+                    <div class="metric-change positive">+0.3</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Graphiques de performance -->
+        <section class="charts-section">
+            <div class="chart-container">
+                <h3>Performance des lignes</h3>
+                <canvas id="linePerformanceChart"></canvas>
+            </div>
+            
+            <div class="chart-container">
+                <h3>Trafic aux heures de pointe</h3>
+                <canvas id="peakHoursChart"></canvas>
+            </div>
+        </section>
+
+        <!-- Comparaison Citymapper -->
+        <section class="comparison-section">
+            <h3>🏆 Comparaison Citymapper vs RATP</h3>
+            <div class="comparison-grid">
+                <div class="comparison-card ratp">
+                    <h4>RATP</h4>
+                    <div class="accuracy-score" id="ratp-accuracy">--</div>
+                    <div class="accuracy-label">Précision</div>
+                </div>
+                
+                <div class="comparison-card citymapper">
+                    <h4>Citymapper</h4>
+                    <div class="accuracy-score" id="citymapper-accuracy">--</div>
+                    <div class="accuracy-label">Précision</div>
+                </div>
+                
+                <div class="comparison-card advantage">
+                    <h4>Avantage</h4>
+                    <div class="advantage-text" id="advantage-text">--</div>
+                    <div class="advantage-label">RATP</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Données temps réel -->
+        <section class="realtime-section">
+            <h3>📡 Données temps réel</h3>
+            <div class="realtime-grid">
+                <div class="realtime-card">
+                    <h4>Retards aujourd'hui</h4>
+                    <div class="realtime-value" id="total-delays">--</div>
+                    <div class="realtime-detail">Retard moyen: <span id="avg-delay">--</span> min</div>
+                </div>
+                
+                <div class="realtime-card">
+                    <h4>Stations PRIM</h4>
+                    <div class="realtime-value" id="prim-stations">--</div>
+                    <div class="realtime-detail">Données en temps réel</div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>

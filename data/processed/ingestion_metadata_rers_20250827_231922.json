@@ -1,0 +1,8 @@
+{
+  "route_type": "rers",
+  "timestamp": "2025-08-27T23:19:22.361392",
+  "success": true,
+  "filepath": "data/processed/rer/rers_20250827_231922.parquet",
+  "record_count": 10,
+  "error": null
+}

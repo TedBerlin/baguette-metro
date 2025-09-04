@@ -1,0 +1,60 @@
+name: staging
+on:
+  workflow_run:
+    workflows: ["CI/CD Pipeline - Baguette & Métro"]
+    types:
+      - completed
+    branches:
+      - develop
+
+jobs:
+  deploy-staging:
+    runs-on: ubuntu-latest
+    environment: staging
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Deploy to staging environment
+      run: |
+        echo "🚀 Déploiement vers l'environnement staging"
+        echo "Branch: ${{ github.ref }}"
+        echo "Commit: ${{ github.sha }}"
+        
+        # Ici vous pouvez ajouter vos commandes de déploiement
+        # Par exemple :
+        # - kubectl apply -f k8s/staging/
+        # - docker-compose -f docker-compose.staging.yml up -d
+        # - aws ecs update-service --cluster staging --service baguette-metro
+        
+    - name: Run health checks
+      run: |
+        echo "🏥 Vérification de la santé de l'application"
+        # Attendre que l'application soit prête
+        sleep 30
+        
+        # Tests de santé
+        curl -f http://staging.baguette-metro.fr/health || exit 1
+        curl -f http://staging.baguette-metro.fr/api/health || exit 1
+        
+    - name: Run integration tests
+      run: |
+        echo "🧪 Tests d'intégration sur staging"
+        # Tests d'intégration après déploiement
+        python -m pytest tests/integration/ -v
+        
+    - name: Notify deployment success
+      if: success()
+      run: |
+        echo "✅ Déploiement staging réussi"
+        # Notification Slack/Discord/Email
+        
+    - name: Notify deployment failure
+      if: failure()
+      run: |
+        echo "❌ Déploiement staging échoué"
+        # Notification d'erreur
+
+

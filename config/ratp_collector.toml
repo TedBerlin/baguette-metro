@@ -1,0 +1,21 @@
+# Configuration du collecteur RATP
+[ratp_collector]
+enabled = true
+base_url = "https://api-ratp.pierre-grimaud.fr/v4"
+gtfs_rt_url = "https://api-ratp.pierre-grimaud.fr/v4/gtfs/rt"
+prim_url = "https://api-ratp.pierre-grimaud.fr/v4/prim"
+
+[collection]
+interval_seconds = 30
+cache_ttl_seconds = 300
+max_retries = 3
+timeout_seconds = 30
+
+[database]
+path = "data/ratp_data.db"
+cache_dir = "data/cache/ratp"
+
+[monitoring]
+log_level = "INFO"
+enable_metrics = true
+health_check_interval = 60

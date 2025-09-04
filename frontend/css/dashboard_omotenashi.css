@@ -1,0 +1,506 @@
+/* 🚇 DASHBOARD OMOTENASHI - CSS */
+/* Philosophie : Anticipation intelligente des besoins voyageurs */
+
+/* ============================================================================
+   🌐 VARIABLES CSS & RESET
+   ============================================================================ */
+
+:root {
+    --primary-color: #2c3e50;
+    --secondary-color: #3498db;
+    --accent-color: #e74c3c;
+    --success-color: #27ae60;
+    --warning-color: #f39c12;
+    --danger-color: #e74c3c;
+    --light-bg: #ecf0f1;
+    --dark-bg: #34495e;
+    --text-primary: #2c3e50;
+    --text-secondary: #7f8c8d;
+    --border-radius: 12px;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+/* ============================================================================
+   🎯 HEADER OMOTENASHI
+   ============================================================================ */
+
+.dashboard-header {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 2rem 0;
+    text-align: center;
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+}
+
+.dashboard-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="1.5" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="80" r="1" fill="rgba(255,255,255,0.1)"/></svg>');
+    animation: float 20s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+}
+
+.header-content h1 {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    margin-bottom: 1rem;
+}
+
+.last-update {
+    background: rgba(255,255,255,0.1);
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    backdrop-filter: blur(10px);
+}
+
+.btn-refresh {
+    background: var(--secondary-color);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: var(--transition);
+    margin-left: 10px;
+}
+
+.btn-refresh:hover {
+    background: #2980b9;
+    transform: translateY(-1px);
+}
+
+.btn-refresh:active {
+    transform: translateY(0);
+}
+
+.data-source {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4CAF50;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-left: 10px;
+    border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+/* ============================================================================
+   📊 SECTIONS PRIORITAIRES
+   ============================================================================ */
+
+section {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+section h2 {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+/* ============================================================================
+   🥇 PRIORITÉ MAXIMALE - Métriques Critiques
+   ============================================================================ */
+
+.priority-max {
+    background: rgba(255,255,255,0.95);
+    border-radius: var(--border-radius);
+    margin: 2rem auto;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(10px);
+}
+
+.metric-card {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow);
+    border-left: 5px solid var(--secondary-color);
+    transition: var(--transition);
+}
+
+.metric-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.metric-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--light-bg);
+}
+
+.metric-header h3 {
+    font-size: 1.3rem;
+    color: var(--primary-color);
+}
+
+.status-indicator {
+    font-size: 1.5rem;
+    padding: 0.5rem;
+    border-radius: 50%;
+    background: var(--light-bg);
+}
+
+.metric-content {
+    display: grid;
+    gap: 1rem;
+}
+
+.metric-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    background: var(--light-bg);
+    border-radius: 8px;
+}
+
+.metric-item.highlight {
+    background: linear-gradient(135deg, var(--success-color), var(--secondary-color));
+    color: #000000 !important;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.8);
+    border: 3px solid #000000;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    font-size: 1.1em;
+}
+
+.metric-item .label {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.metric-item .value {
+    font-weight: bold;
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+}
+
+/* ============================================================================
+   🥈 PRIORITÉ SECONDAIRE - Détails en Clic
+   ============================================================================ */
+
+.priority-secondary {
+    background: rgba(255,255,255,0.9);
+    border-radius: var(--border-radius);
+    margin: 2rem auto;
+    box-shadow: var(--shadow);
+}
+
+.line-detail, .bakery-detail {
+    position: relative;
+    border-left: 5px solid var(--warning-color);
+}
+
+.close-btn {
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: var(--transition);
+}
+
+.close-btn:hover {
+    background: var(--danger-color);
+    transform: scale(1.1);
+}
+
+/* ============================================================================
+   🥉 PRIORITÉ TERTIAIRE - Analytics & Performance
+   ============================================================================ */
+
+.priority-tertiary {
+    background: rgba(255,255,255,0.85);
+    border-radius: var(--border-radius);
+    margin: 2rem auto;
+    box-shadow: var(--shadow);
+}
+
+.language-chart {
+    width: 100%;
+    height: 200px;
+    margin: 1rem 0;
+}
+
+/* ============================================================================
+   🔄 ACTIONS & BOUTONS
+   ============================================================================ */
+
+.actions-section {
+    text-align: center;
+    padding: 2rem;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--success-color), var(--secondary-color));
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(39, 174, 96, 0.4);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, var(--warning-color), var(--accent-color));
+    color: white;
+}
+
+.btn-secondary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(243, 156, 18, 0.4);
+}
+
+/* ============================================================================
+   📊 COMPOSANTS SPÉCIAUX
+   ============================================================================ */
+
+.lignes-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.ligne-item {
+    background: var(--light-bg);
+    padding: 0.8rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: var(--transition);
+    border: 2px solid transparent;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.ligne-nom {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+}
+
+.ligne-temps {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.lignes-total {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 1rem;
+    background: var(--primary-color);
+    color: white;
+    border-radius: var(--border-radius);
+    margin-top: 1rem;
+    font-size: 1.1rem;
+}
+
+.ligne-item:hover {
+    border-color: var(--secondary-color);
+    background: white;
+}
+
+.ligne-item.perturbee {
+    background: var(--danger-color);
+    color: white;
+}
+
+.heatmap {
+    display: flex;
+    gap: 0.25rem;
+    align-items: end;
+    height: 40px;
+}
+
+.heatmap-bar {
+    width: 20px;
+    background: var(--light-bg);
+    border-radius: 2px;
+    transition: var(--transition);
+}
+
+.heatmap-bar[data-level="1"] { height: 8px; background: var(--success-color); }
+.heatmap-bar[data-level="2"] { height: 16px; background: var(--success-color); }
+.heatmap-bar[data-level="3"] { height: 24px; background: var(--warning-color); }
+.heatmap-bar[data-level="4"] { height: 32px; background: var(--warning-color); }
+.heatmap-bar[data-level="5"] { height: 40px; background: var(--danger-color); }
+
+/* ============================================================================
+   📱 RESPONSIVE DESIGN
+   ============================================================================ */
+
+@media (max-width: 768px) {
+    .dashboard-header h1 {
+        font-size: 2rem;
+    }
+    
+    section {
+        padding: 1rem;
+    }
+    
+    .metric-card {
+        padding: 1rem;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .btn {
+        width: 100%;
+        max-width: 300px;
+    }
+    
+    .lignes-list {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .subtitle {
+        font-size: 1rem;
+    }
+    
+    .metric-item {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+}
+
+/* ============================================================================
+   🎨 ANIMATIONS & TRANSITIONS
+   ============================================================================ */
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.metric-card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.metric-card:nth-child(1) { animation-delay: 0.1s; }
+.metric-card:nth-child(2) { animation-delay: 0.2s; }
+.metric-card:nth-child(3) { animation-delay: 0.3s; }
+
+/* ============================================================================
+   📊 FOOTER
+   ============================================================================ */
+
+.dashboard-footer {
+    background: var(--dark-bg);
+    color: white;
+    text-align: center;
+    padding: 2rem;
+    margin-top: 3rem;
+}
+
+.dashboard-footer p {
+    margin-bottom: 0.5rem;
+    opacity: 0.9;
+}
+
+/* ============================================================================
+   🚀 LOADING STATES
+   ============================================================================ */
+
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: '🔄';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2rem;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}

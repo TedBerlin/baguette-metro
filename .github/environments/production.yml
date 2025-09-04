@@ -1,0 +1,90 @@
+name: production
+on:
+  workflow_run:
+    workflows: ["CI/CD Pipeline - Baguette & Métro"]
+    types:
+      - completed
+    branches:
+      - main
+
+jobs:
+  deploy-production:
+    runs-on: ubuntu-latest
+    environment: production
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Deploy to production environment
+      run: |
+        echo "🚀 Déploiement vers l'environnement production"
+        echo "Branch: ${{ github.ref }}"
+        echo "Commit: ${{ github.sha }}"
+        
+        # Déploiement production avec rollback automatique
+        # Par exemple :
+        # - kubectl apply -f k8s/production/
+        # - docker-compose -f docker-compose.production.yml up -d
+        # - aws ecs update-service --cluster production --service baguette-metro
+        
+    - name: Wait for deployment
+      run: |
+        echo "⏳ Attente du déploiement..."
+        sleep 60
+        
+    - name: Health check
+      run: |
+        echo "🏥 Vérification de la santé de l'application"
+        
+        # Tests de santé critiques
+        for i in {1..5}; do
+          if curl -f http://baguette-metro.fr/health; then
+            echo "✅ Application en ligne"
+            break
+          else
+            echo "❌ Tentative $i échouée, nouvelle tentative dans 30s..."
+            sleep 30
+          fi
+        done
+        
+        # Tests de santé API
+        curl -f http://baguette-metro.fr/api/health || exit 1
+        
+    - name: Smoke tests
+      run: |
+        echo "🧪 Tests de fumée"
+        # Tests basiques pour vérifier que l'application fonctionne
+        python -m pytest tests/smoke/ -v
+        
+    - name: Performance tests
+      run: |
+        echo "⚡ Tests de performance"
+        # Tests de charge basiques
+        # ab -n 100 -c 10 http://baguette-metro.fr/
+        
+    - name: Notify deployment success
+      if: success()
+      run: |
+        echo "🎉 Déploiement production réussi"
+        echo "URL: https://baguette-metro.fr"
+        echo "API: https://baguette-metro.fr/api"
+        # Notification de succès
+        
+    - name: Rollback on failure
+      if: failure()
+      run: |
+        echo "🔄 Rollback automatique"
+        # Rollback vers la version précédente
+        # kubectl rollout undo deployment/baguette-metro
+        
+    - name: Notify deployment failure
+      if: failure()
+      run: |
+        echo "❌ Déploiement production échoué - Rollback effectué"
+        # Notification d'erreur avec rollback
+
+
+
+

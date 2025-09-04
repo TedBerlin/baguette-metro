@@ -1,0 +1,8 @@
+{
+  "route_type": "tramways",
+  "timestamp": "2025-08-27T23:20:03.392644",
+  "success": true,
+  "filepath": "data/processed/tram/tramways_20250827_232003.parquet",
+  "record_count": 10,
+  "error": null
+}
